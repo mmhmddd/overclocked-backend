@@ -1,25 +1,42 @@
-// // controller/orderController.js
-// const Order = require('../model/Order');
+// controllers/orderController.js
+const Order = require('../model/Order');
 
-// const createOrder = (req, res) => {
-//   const { name, price, quantity } = req.body;
-//   if (!name || !price || !quantity) {
-//     return res.status(400).json({ message: 'Name, price and quantity required' });
-//   }
+// Create a new order
+const createOrder = async (req, res) => {
+  const { items, totalPrice } = req.body;
 
-//   const order = Order.create({
-//     userId: req.user.id,
-//     name,
-//     price: Number(price),
-//     quantity: Number(quantity)
-//   });
+  // Validate that items array exists and is not empty
+  if (!items || items.length === 0) {
+    return res.status(400).json({ message: 'No items found in the order' });
+  }
 
-//   res.status(201).json(order);
-// };
+  // Validate total price is provided and greater than zero
+  if (!totalPrice || totalPrice <= 0) {
+    return res.status(400).json({ message: 'Total price is required and must be greater than zero' });
+  }
 
-// const getMyOrders = (req, res) => {
-//   const orders = Order.findByUserId(req.user.id);
-//   res.json(orders);
-// };
+  // Create a new order linked to the authenticated user
+  const order = await Order.create({
+    user: req.user._id,
+    items,
+    totalPrice
+  });
 
-// module.exports = { createOrder, getMyOrders };
+  // Return success response with order details
+  res.status(201).json({
+    success: true,
+    message: 'Order created successfully',
+    order
+  });
+};
+
+// Get all orders for the logged-in user
+const getMyOrders = async (req, res) => {
+  // Find all orders for this user and sort them (newest first)
+  const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+  // Return orders list
+  res.json(orders);
+};
+
+module.exports = { createOrder, getMyOrders };

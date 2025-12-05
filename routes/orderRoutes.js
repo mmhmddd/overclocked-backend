@@ -1,9 +1,10 @@
-// const express = require('express');
-// const router = express.Router();
-// const { protect } = require('../middleware/authMiddleware');
-// const { createOrder, getMyOrders } = require('../controller/orderController');
+// routes/order.js
+const express = require('express');
+const router = express.Router();
+const { createOrder, getMyOrders } = require('../controllers/orderController');
+const { protect } = require('../middleware/auth'); 
 
-// router.post('/', protect, createOrder);
-// router.get('/', protect, getMyOrders);
+router.post('/', protect, createOrder);
+router.get('/myorders', protect, getMyOrders);
 
-// module.exports = router;
+module.exports = router;
